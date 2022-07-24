@@ -20,9 +20,24 @@ public class HammerItem extends PickaxeItem {
     public HammerItem(int durability, ToolMaterial material, int attackDamage, float attackSpeed, Settings settings) {
         super(material, attackDamage, attackSpeed, new Item.Settings().maxDamage(durability).group(ItemGroup.TOOLS));
         miningLevel = material.getMiningLevel();
-
     }
 
+    @Override
+    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+        final int stability = Math.min(10, Math.max(0, miningLevel + (int) Math.log10(stack.getMaxDamage())));
+        final String stabilityKey = switch (stability) {
+            case 0, 1, 2, 3 -> "low";
+            case 4, 5, 6 -> "medium";
+            case 7, 8, 9, 10 -> "high";
+            default -> "";
+        };
+        final Formatting formatting = switch (stability) {
+            case 0, 1, 2, 3 -> Formatting.DARK_RED;
+            case 4, 5, 6 -> Formatting.YELLOW;
+            case 7, 8, 9, 10 -> Formatting.GREEN;
+            default -> Formatting.WHITE;
+        };
+    }
 
     public ItemStack getRecipeRemainder(ItemStack stackIn) {
         final int instability = Math.min(Math.max(0, 10 - miningLevel - (int) Math.log10(stackIn.getMaxDamage())), 10);
@@ -37,17 +52,13 @@ public class HammerItem extends PickaxeItem {
         return stack;
     }
 
-@Override
-    public boolean canMine(BlockState state, World world, BlockPos pos,
-                           PlayerEntity playerIn) {
+    @Override
+    public boolean canMine(BlockState state, World world, BlockPos pos, PlayerEntity playerIn) {
         if (world.isClient) return true;
         if (playerIn.isSneaking()) return true;
-        final boolean obsidianFlag = state.getBlock() == Blocks.OBSIDIAN ||
-                state.getBlock() == Blocks.CRYING_OBSIDIAN;
-        final byte dmg = AreaUtility.attemptBreakNeighbors(world, playerIn,
-                1, obsidianFlag);
-        final Hand hand = (playerIn.getStackInHand(Hand.MAIN_HAND).getItem() instanceof HammerItem)
-                ? Hand.MAIN_HAND : Hand.OFF_HAND;
+        final boolean obsidianFlag = state.getBlock() == Blocks.OBSIDIAN || state.getBlock() == Blocks.CRYING_OBSIDIAN;
+        final byte dmg = AreaUtility.attemptBreakNeighbors(pos, world, playerIn, 1,1, obsidianFlag);
+        final Hand hand = (playerIn.getStackInHand(Hand.MAIN_HAND).getItem() instanceof HammerItem) ? Hand.MAIN_HAND : Hand.OFF_HAND;
         playerIn.getStackInHand(hand).damage(dmg, playerIn, player -> player.sendToolBreakStatus(hand));
         return true;
     }

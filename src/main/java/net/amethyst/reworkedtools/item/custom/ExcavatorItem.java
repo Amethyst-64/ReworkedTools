@@ -1,19 +1,16 @@
 package net.amethyst.reworkedtools.item.custom;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.data.server.BlockTagProvider;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.tag.BlockTags;
+import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,43 +26,22 @@ public class ExcavatorItem extends ShovelItem {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
-        final int stability = Math.min(10, Math.max(0, miningLevel + (int) Math.log10(stack.getMaxDamage())));
-        final String stabilityKey = switch (stability) {
-            case 0, 1, 2, 3 -> "low";
-            case 4, 5, 6 -> "medium";
-            case 7, 8, 9, 10 -> "high";
-            default -> "";
-        };
-        final Formatting formatting = switch (stability) {
-            case 0, 1, 2, 3 -> Formatting.DARK_RED;
-            case 4, 5, 6 -> Formatting.YELLOW;
-            case 7, 8, 9, 10 -> Formatting.GREEN;
-            default -> Formatting.WHITE;
-        };
+    public boolean isSuitableFor(BlockState state)
+    {
+        return state.isIn(BlockTags.SHOVEL_MINEABLE);
     }
 
-    public ItemStack getRecipeRemainder(ItemStack stackIn) {
-        final int instability = Math.min(Math.max(0, 10 - miningLevel - (int) Math.log10(stackIn.getMaxDamage())), 10);
-        final ItemStack stack = stackIn.copy();
-        final Random random = new Random();
-        final int damageToAdd = (random.nextInt(100) * instability > 400) ? random.nextInt(50, 101) : 1 + random.nextInt(instability);
-        stack.setDamage(stack.getDamage() + damageToAdd);
-
-        if (stack.getDamage() >= stack.getMaxDamage()) {
-            stack.decrement(1);
-        }
-        return stack;
-    }
 
     @Override
-    public boolean canMine(BlockState state, World world, BlockPos pos, PlayerEntity playerIn) {
-        if (world.isClient) return true;
-        if(isSuitableFor(state)) return state.isIn(BlockTags.SHOVEL_MINEABLE);
-        final boolean obsidianFlag = state.getBlock() == Blocks.OBSIDIAN || state.getBlock() == Blocks.CRYING_OBSIDIAN;
-        final byte dmg = AreaUtility.attemptBreakNeighbors(world, playerIn, 1, obsidianFlag);
-        final Hand hand = (playerIn.getStackInHand(Hand.MAIN_HAND).getItem() instanceof ExcavatorItem) ? Hand.MAIN_HAND : Hand.OFF_HAND;
-        playerIn.getStackInHand(hand).damage(dmg, playerIn, player -> player.sendToolBreakStatus(hand));
+    public boolean canMine(BlockState state, World world, BlockPos pos, PlayerEntity playerIn)
+    {
+        if(!playerIn.isSneaking() && playerIn.getMainHandStack().isSuitableFor(world.getBlockState(pos)))
+        {
+            final boolean obsidianFlag = state.getBlock() == Blocks.OBSIDIAN || state.getBlock() == Blocks.CRYING_OBSIDIAN;
+            AreaUtility.attemptBreakNeighbors(pos, world, playerIn, 2,1, obsidianFlag);
+
+        }
+
         return true;
     }
 
@@ -75,8 +51,8 @@ public class ExcavatorItem extends ShovelItem {
         return miner.isSneaking();
     }
      */
-/*
-    @Override
+
+    /*
     public ActionResult useOnBlock(ItemUsageContext context) {
         final PlayerEntity player = context.getPlayer();
         if (player == null) {
@@ -87,13 +63,13 @@ public class ExcavatorItem extends ShovelItem {
         if (world == null) {
             return ActionResult.PASS;
         }
-        final ItemStack excavatorStack = context.getStack();
+        final ItemStack hammerStack = context.getStack();
         final Direction direction = context.getSide();
         final BlockPos pos = context.getBlockPos();
         if (player instanceof ServerPlayerEntity serverPlayer) {
-            tryBreakNineBlocks(world, serverPlayer, directionToInt(direction), pos, excavatorStack, hand);
+            tryBreakNineBlocks(world, serverPlayer, directionToInt(direction), pos, hammerStack, hand);
         }
-        player.getItemCooldownManager().set(excavatorStack.getItem(),
+        player.getItemCooldownManager().set(hammerStack.getItem(),
                 //below is the cool-down tick
                 Math.max(5, 50 - 10 * miningLevel));
         return ActionResult.success(world.isClient);
@@ -105,7 +81,7 @@ public class ExcavatorItem extends ShovelItem {
             case NORTH, SOUTH -> 3;
         };
     }
-    public void tryBreakNineBlocks(World world, ServerPlayerEntity player, int direction, BlockPos center, ItemStack excavatorStack, Hand hand) {
+    public void tryBreakNineBlocks(World world, ServerPlayerEntity player, int direction, BlockPos center, ItemStack hammerStack, Hand hand) {
         final boolean calX = !(direction == 1);
         final boolean calY = !(direction == 2);
         final boolean calZ = !(direction == 3);
@@ -116,16 +92,13 @@ public class ExcavatorItem extends ShovelItem {
         for (int x = 0; x <= (calX ? 2 : 0) && willContinue; x++) {
             for (int y = 0; y <= (calY ? 2 : 0) && willContinue; y++) {
                 for (int z = 0; z <= (calZ ? 2 : 0) && willContinue; z++) {
-                    willContinue = checkAndTryBreakBlock(world, player, new BlockPos(xStart + x, yStart + y, zStart + z), excavatorStack, hand);
+                    willContinue = checkAndTryBreakBlock(world, player, new BlockPos(xStart + x, yStart + y, zStart + z), hammerStack, hand);
                 }
             }
         }
-}
-    public boolean checkAndTryBreakBlock(World world, ServerPlayerEntity player, BlockPos pos, ItemStack excavator, Hand hand) {
+    }
+    public boolean checkAndTryBreakBlock(World world, ServerPlayerEntity player, BlockPos pos, ItemStack hammer, Hand hand) {
         final Block blockToCheck = world.getBlockState(pos).getBlock();
-
-
-
         if (blockToCheck instanceof BlockWithEntity) {
             return true;
         }
@@ -134,10 +107,11 @@ public class ExcavatorItem extends ShovelItem {
             return true;
         }
         world.breakBlock(pos, true, player);
-        if (excavator.damage(1, player.world.random, player)) {
+        if (hammer.damage(1, player.world.random, player)) {
             player.setStackInHand(hand, ItemStack.EMPTY);
             return false;
         }
         return true;
     }
-*/}
+     */
+}
