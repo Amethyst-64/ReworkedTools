@@ -1,42 +1,40 @@
 package net.amethyst.reworkedtools.item;
 
 import net.amethyst.reworkedtools.ReworkedTools;
-import net.amethyst.reworkedtools.item.custom.ModHammer;
+import net.amethyst.reworkedtools.item.custom.ExcavatorItem;
+import net.amethyst.reworkedtools.item.custom.HammerItem;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.PickaxeItem;
-import net.minecraft.item.ToolItem;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 public class ModItems {
-    public static final Item MODHAMMER = registerItem( "hammer",
-            new ModHammer(ModToolMaterials.STONE,2, 6f,
-                    (new FabricItemSettings().group(ModItemGroup.MODHAMMER))));
+    public static final Item HAMMER = registerItem( "hammer",
+            new HammerItem(131,ModToolMaterials.STONE,2,
+                    4,(new FabricItemSettings().group(ModItemGroup.HAMMER))));
 
     public static final Item IRON_HAMMER = registerItem( "iron_hammer",
-            new ModHammer(ModToolMaterials.IRON,2, 4.5f,
-                    (new FabricItemSettings().group(ModItemGroup.MODHAMMER))));
+            new HammerItem(1000, ModToolMaterials.IRON,2,
+                    7f,(new FabricItemSettings().group(ModItemGroup.HAMMER))));
     public static final Item DIAMOND_HAMMER = registerItem( "diamond_hammer",
-            new ModHammer(ModToolMaterials.DIAMOND,3, 8.5f,
-                    (new FabricItemSettings().group(ModItemGroup.MODHAMMER))));
+            new HammerItem(3122,ModToolMaterials.DIAMOND,3, 9f,
+                    (new FabricItemSettings().group(ModItemGroup.HAMMER))));
     public static final Item NETHERITE_HAMMER = registerItem( "netherite_hammer",
-            new ModHammer(ModToolMaterials.NETHERITE,4, 9.5f,
-                    (new FabricItemSettings().group(ModItemGroup.MODHAMMER))));
-    public static final Item MODEXCAVATOR = registerItem( "excavator",
-            new ModHammer(ModToolMaterials.STONE,2, 6f,
-                    (new FabricItemSettings().group(ModItemGroup.MODEXCAVATOR))));
+            new HammerItem(4062,ModToolMaterials.NETHERITE,4, 10f,
+                    (new FabricItemSettings().group(ModItemGroup.HAMMER))));
+    public static final Item EXCAVATOR = registerItem( "excavator",
+            new HammerItem(131,ModToolMaterials.STONE,2,
+                    4,(new FabricItemSettings().group(ModItemGroup.EXCAVATOR))));
 
     public static final Item IRON_EXCAVATOR = registerItem( "iron_excavator",
-            new ModHammer(ModToolMaterials.IRON,2, 4.5f,
-                    (new FabricItemSettings().group(ModItemGroup.MODEXCAVATOR))));
+            new HammerItem(1000, ModToolMaterials.IRON,2,
+                    7f,(new FabricItemSettings().group(ModItemGroup.EXCAVATOR))));
     public static final Item DIAMOND_EXCAVATOR = registerItem( "diamond_excavator",
-            new ModHammer(ModToolMaterials.DIAMOND,3, 8.5f,
-                    (new FabricItemSettings().group(ModItemGroup.MODEXCAVATOR))));
+            new HammerItem(3122,ModToolMaterials.DIAMOND,3, 9f,
+                    (new FabricItemSettings().group(ModItemGroup.EXCAVATOR))));
     public static final Item NETHERITE_EXCAVATOR = registerItem( "netherite_excavator",
-            new ModHammer(ModToolMaterials.NETHERITE,4, 9.5f,
-                    (new FabricItemSettings().group(ModItemGroup.MODEXCAVATOR))));
+            new HammerItem(4062,ModToolMaterials.NETHERITE,4, 10f,
+                    (new FabricItemSettings().group(ModItemGroup.EXCAVATOR))));
 
 
 
