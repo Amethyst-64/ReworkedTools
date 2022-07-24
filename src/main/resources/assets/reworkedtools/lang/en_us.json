@@ -7,5 +7,6 @@
   "item.reworkedtools.iron_excavator": "Iron Excavator",
   "item.reworkedtools.diamond_excavator": "Diamond Excavator",
   "item.reworkedtools.netherite_excavator": "Netherite Excavator",
-  "itemGroup.reworkedtools.hammer": "Reworked Tools Tutorial Tab"
+  "itemGroup.reworkedtools.hammer": "Reworked Tools Tutorial Tab",
+  "intemGroup.reworkedtools.excavator": "Reworked Tools Tutorial Tab"
 }
